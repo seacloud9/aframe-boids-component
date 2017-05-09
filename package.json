@@ -67,5 +67,8 @@
       "examples/build.js",
       "dist/**"
     ]
+  },
+  "dependencies": {
+    "aframe-extras": "^3.8.1"
   }
 }

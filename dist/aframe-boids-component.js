@@ -45,6 +45,9 @@
 /***/ (function(module, exports, __webpack_require__) {
 
 	/* global AFRAME */
+	var extrasTube = __webpack_require__(1);
+	// Register a single component.
+	//AFRAME.registerComponent('tube', extras.primitives.tube);
 
 	if (typeof AFRAME === 'undefined') {
 	    throw new Error('Component attempted to register before AFRAME was available.');
@@ -79,12 +82,13 @@
 
 	        this.data.randomCamera = this.randomCamera.bind(this)
 
-	        var Boid = __webpack_require__(1);
-	        var Bird = __webpack_require__(2);
+	        var Boid = __webpack_require__(2);
+	        var Bird = __webpack_require__(3);
 
 	        this.data.boids = [];
 	        this.data.birdsEl = [];
 	        this.data.birds = [];
+	        this.data.tubesEl = [];
 
 	        for ( var i = 0; i < 200; i ++ ) {
 	            var boidEL = document.createElement('a-entity');
@@ -100,12 +104,17 @@
 	            this.data.bird = this.data.birds[ i ] = new THREE.Mesh( new Bird(), new THREE.MeshBasicMaterial( { color:this.data.color, side: THREE.DoubleSide } ) );
 	            //var _camera = new THREE.PerspectiveCamera( 45, this.data.SCREEN_WIDTH  / this.data.SCREEN_HEIGHT , 1, 1000 )
 	            var cameraEl = document.createElement('a-entity');
-	            cameraEl.setAttribute('id', 'boidCam'+i)
+	            cameraEl.setAttribute('id', 'boidCam'+i);
 	            cameraEl.setAttribute('camera', 'active: false');
 	            this.data.birds[ i ].add(cameraEl.object3D)
 	            this.data.cameras.push(cameraEl)
 	            this.data.bird.phase = Math.floor( Math.random() * 62.83 );
 	            //this.data.scene.add( this.data.bird );
+	            var tubeEl = document.createElement('a-tube');
+	            tubeEl.setAttribute('material', 'color: red');
+	            tubeEl.setAttribute('path',  this.data.boid.position.x + ' ' + this.data.boid.position.y + ' ' + this.data.boid.position.z );
+	            this.data.tubesEl.push(tubeEl);
+	            boidEL.appendChild(tubeEl);
 	            boidEL.object3D.add(this.data.bird);
 	            this.data.birdsEl.push(boidEL)
 	            this.el.sceneEl.appendChild(boidEL);
@@ -165,6 +174,7 @@
 	            this.data.bird.rotation.z = Math.asin( this.data.boid.velocity.y / this.data.boid.velocity.length() );
 	            this.data.birdsEl[ i ].setAttribute('position', this.data.bird.position.x +' '+ this.data.bird.position.y + ' '+ this.data.bird.position.z);
 	            this.data.birdsEl[ i ].setAttribute('rotation', this.data.bird.rotation.x +' '+ this.data.bird.rotation.y + ' '+ this.data.bird.rotation.z);
+	            this.data.tubesEl[ i ].setAttribute('path', this.data.tubesEl[ i ].getAttribute('path') + ',' + this.data.bird.position.x +' '+ this.data.bird.position.y + ' '+ this.data.bird.position.z);
 	            this.data.bird.phase = ( this.data.bird.phase + ( Math.max( 0, this.data.bird.rotation.z ) + 0.1 )  ) % 62.83;
 	            this.data.bird.geometry.vertices[ 5 ].y = this.data.bird.geometry.vertices[ 4 ].y = Math.sin( this.data.bird.phase ) * 5;
 
@@ -188,6 +198,85 @@
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports) {
+
+	/**
+	 * Tube following a custom path.
+	 *
+	 * Usage:
+	 *
+	 * ```html
+	 * <a-tube path="5 0 5, 5 0 -5, -5 0 -5" radius="0.5"></a-tube>
+	 * ```
+	 */
+	var Primitive = module.exports.Primitive = {
+	  defaultComponents: {
+	    tube:           {},
+	  },
+	  mappings: {
+	    path:           'tube.path',
+	    segments:       'tube.segments',
+	    radius:         'tube.radius',
+	    radialSegments: 'tube.radialSegments',
+	    closed:         'tube.closed'
+	  }
+	};
+
+	var Component = module.exports.Component = {
+	  schema: {
+	    path:           {default: []},
+	    segments:       {default: 64},
+	    radius:         {default: 1},
+	    radialSegments: {default: 8},
+	    closed:         {default: false}
+	  },
+
+	  init: function () {
+	    var el = this.el,
+	        data = this.data,
+	        material = el.components.material;
+
+	    if (!data.path.length) {
+	      console.error('[a-tube] `path` property expected but not found.');
+	      return;
+	    }
+
+	    var curve = new THREE.CatmullRomCurve3(data.path.map(function (point) {
+	      point = point.split(' ');
+	      return new THREE.Vector3(Number(point[0]), Number(point[1]), Number(point[2]));
+	    }));
+	    var geometry = new THREE.TubeGeometry(
+	      curve, data.segments, data.radius, data.radialSegments, data.closed
+	    );
+
+	    if (!material) {
+	      material = {};
+	      material.material = new THREE.MeshPhongMaterial();
+	    }
+
+	    this.mesh = new THREE.Mesh(geometry, material.material);
+	    this.el.setObject3D('mesh', this.mesh);
+	  },
+
+	  remove: function () {
+	    if (this.mesh) this.el.removeObject3D('mesh');
+	  }
+	};
+
+	module.exports.registerAll = (function () {
+	  var registered = false;
+	  return function (AFRAME) {
+	    if (registered) return;
+	    AFRAME = AFRAME || window.AFRAME;
+	    AFRAME.registerComponent('tube', Component);
+	    AFRAME.registerPrimitive('a-tube', Primitive);
+	    registered = true;
+	  };
+	}());
+
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports) {
 
 	/**
@@ -476,7 +565,7 @@
 
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports) {
 
 	/**
