@@ -1,7 +1,7 @@
 /* global AFRAME */
 var extrasTube = require('aframe-extras/src/primitives/a-tube.js');
 // Register a single component.
-//AFRAME.registerComponent('tube', extras.primitives.tube);
+AFRAME.registerComponent('tube', extras.primitives.tube);
 
 if (typeof AFRAME === 'undefined') {
     throw new Error('Component attempted to register before AFRAME was available.');

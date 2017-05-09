@@ -47,7 +47,7 @@
 	/* global AFRAME */
 	var extrasTube = __webpack_require__(1);
 	// Register a single component.
-	//AFRAME.registerComponent('tube', extras.primitives.tube);
+	AFRAME.registerComponent('tube', extras.primitives.tube);
 
 	if (typeof AFRAME === 'undefined') {
 	    throw new Error('Component attempted to register before AFRAME was available.');
