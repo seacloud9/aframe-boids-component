@@ -1,7 +1,8 @@
 /* global AFRAME */
+
 var extrasTube = require('aframe-extras/src/primitives/a-tube.js');
 // Register a single component.
-AFRAME.registerComponent('tube', extras.primitives.tube);
+//AFRAME.registerComponent('tube', extras.primitives.tube);
 
 if (typeof AFRAME === 'undefined') {
     throw new Error('Component attempted to register before AFRAME was available.');
@@ -12,6 +13,9 @@ if (typeof AFRAME === 'undefined') {
  */
 AFRAME.registerComponent('aframe-boids', {
     schema: {
+        pathsEnabled:{
+          default:false
+        },
         color:{
             default: 0x0be253
         },
@@ -126,9 +130,13 @@ AFRAME.registerComponent('aframe-boids', {
 
             this.data.bird.rotation.y = Math.atan2( - this.data.boid.velocity.z, this.data.boid.velocity.x );
             this.data.bird.rotation.z = Math.asin( this.data.boid.velocity.y / this.data.boid.velocity.length() );
+
             this.data.birdsEl[ i ].setAttribute('position', this.data.bird.position.x +' '+ this.data.bird.position.y + ' '+ this.data.bird.position.z);
             this.data.birdsEl[ i ].setAttribute('rotation', this.data.bird.rotation.x +' '+ this.data.bird.rotation.y + ' '+ this.data.bird.rotation.z);
-            this.data.tubesEl[ i ].setAttribute('path', this.data.tubesEl[ i ].getAttribute('path') + ',' + this.data.bird.position.x +' '+ this.data.bird.position.y + ' '+ this.data.bird.position.z);
+           if(this.data.pathsEnabled){
+               this.data.tubesEl[ i ].setAttribute('path', this.data.tubesEl[ i ].getAttribute('path') + ',' + this.data.bird.position.x +' '+ this.data.bird.position.y + ' '+ this.data.bird.position.z);
+           }
+
             this.data.bird.phase = ( this.data.bird.phase + ( Math.max( 0, this.data.bird.rotation.z ) + 0.1 )  ) % 62.83;
             this.data.bird.geometry.vertices[ 5 ].y = this.data.bird.geometry.vertices[ 4 ].y = Math.sin( this.data.bird.phase ) * 5;
 
