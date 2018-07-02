@@ -14,7 +14,7 @@ if (typeof AFRAME === 'undefined') {
 AFRAME.registerComponent('aframe-boids', {
     schema: {
         pathsEnabled:{
-          default:false
+          default:true
         },
         color:{
             default: 0x0be253
@@ -44,11 +44,11 @@ AFRAME.registerComponent('aframe-boids', {
         var Bird = require('./vendor/bird.js');
 
         this.data.boids = [];
-        this.data.birdsEl = [];
-        this.data.birds = [];
+        this.data.boidSubjectsEl = [];
+        this.data.boidSubjects = [];
         this.data.tubesEl = [];
 
-        for ( var i = 0; i < 200; i ++ ) {
+        for ( var i = 0; i < 20; i ++ ) {
             var boidEL = document.createElement('a-entity');
             this.data.boid = this.data.boids[ i ] = new Boid();
             this.data.boid.position.x = Math.random() * 400 - 200;
@@ -59,22 +59,25 @@ AFRAME.registerComponent('aframe-boids', {
             this.data.boid.velocity.z = Math.random() * 2 - 1;
             this.data.boid.setAvoidWalls( true );
             this.data.boid.setWorldSize( 500, 500, 400 );
-            this.data.bird = this.data.birds[ i ] = new THREE.Mesh( new Bird(), new THREE.MeshBasicMaterial( { color:this.data.color, side: THREE.DoubleSide } ) );
+            this.data.boidSubject = this.data.boidSubjects[ i ] = new THREE.Mesh( new Bird(), new THREE.MeshBasicMaterial( { color:this.data.color, side: THREE.DoubleSide } ) );
             //var _camera = new THREE.PerspectiveCamera( 45, this.data.SCREEN_WIDTH  / this.data.SCREEN_HEIGHT , 1, 1000 )
             var cameraEl = document.createElement('a-entity');
             cameraEl.setAttribute('id', 'boidCam'+i);
             cameraEl.setAttribute('camera', 'active: false');
-            this.data.birds[ i ].add(cameraEl.object3D)
+            this.data.boidSubjects[ i ].add(cameraEl.object3D)
             this.data.cameras.push(cameraEl)
-            this.data.bird.phase = Math.floor( Math.random() * 62.83 );
-            //this.data.scene.add( this.data.bird );
+            this.data.boidSubject.phase = Math.floor( Math.random() * 62.83 );
+            //this.data.scene.add( this.data.boidSubject );
             var tubeEl = document.createElement('a-tube');
-            tubeEl.setAttribute('material', 'color: red');
-            tubeEl.setAttribute('path',  this.data.boid.position.x + ' ' + this.data.boid.position.y + ' ' + this.data.boid.position.z );
+            tubeEl.setAttribute('material', '');
+            tubeEl.attributes['material'].value = 'color: red'
+            tubeEl.setAttribute('radius', '0.5');
+            tubeEl.setAttribute('path',  this.data.boid.position.x + ' ' + this.data.boid.position.y + ' ' + this.data.boid.position.z + ',' + this.data.boid.position.x + 1 + ' ' + this.data.boid.position.y + 1 + ' ' + this.data.boid.position.z  + 1);
+
             this.data.tubesEl.push(tubeEl);
             boidEL.appendChild(tubeEl);
-            boidEL.object3D.add(this.data.bird);
-            this.data.birdsEl.push(boidEL)
+            boidEL.object3D.add(this.data.boidSubject);
+            this.data.boidSubjectsEl.push(boidEL)
             this.el.sceneEl.appendChild(boidEL);
             boidEL.appendChild(cameraEl);
         }
@@ -117,28 +120,33 @@ AFRAME.registerComponent('aframe-boids', {
      * Called on each scene tick.
      */
     tick: function (t) {
-        for ( var i = 0, il = this.data.birds.length; i < il; i++ ) {
+        for ( var i = 0, il = this.data.boidSubjects.length; i < il; i++ ) {
 
             this.data.boid = this.data.boids[ i ];
             this.data.boid.run( this.data.boids );
 
-            this.data.bird = this.data.birds[ i ];
-            this.data.bird.position.copy( this.data.boids[ i ].position );
+            this.data.boidSubject = this.data.boidSubjects[ i ];
+            this.data.boidSubject.position.copy( this.data.boids[ i ].position );
 
-            this.data.color = this.data.bird.material.color;
-            //this.data.color.r = this.data.color.g = this.data.color.b = ( 500 - this.data.bird.position.z ) / 1000;
+            this.data.color = this.data.boidSubject.material.color;
+            //this.data.color.r = this.data.color.g = this.data.color.b = ( 500 - this.data.boidSubject.position.z ) / 1000;
 
-            this.data.bird.rotation.y = Math.atan2( - this.data.boid.velocity.z, this.data.boid.velocity.x );
-            this.data.bird.rotation.z = Math.asin( this.data.boid.velocity.y / this.data.boid.velocity.length() );
+            this.data.boidSubject.rotation.y = Math.atan2( - this.data.boid.velocity.z, this.data.boid.velocity.x );
+            this.data.boidSubject.rotation.z = Math.asin( this.data.boid.velocity.y / this.data.boid.velocity.length() );
 
-            this.data.birdsEl[ i ].setAttribute('position', this.data.bird.position.x +' '+ this.data.bird.position.y + ' '+ this.data.bird.position.z);
-            this.data.birdsEl[ i ].setAttribute('rotation', this.data.bird.rotation.x +' '+ this.data.bird.rotation.y + ' '+ this.data.bird.rotation.z);
+            this.data.boidSubjectsEl[ i ].setAttribute('position', this.data.boidSubject.position.x +' '+ this.data.boidSubject.position.y + ' '+ this.data.boidSubject.position.z);
+            this.data.boidSubjectsEl[ i ].setAttribute('rotation', this.data.boidSubject.rotation.x +' '+ this.data.boidSubject.rotation.y + ' '+ this.data.boidSubject.rotation.z);
            if(this.data.pathsEnabled){
-               this.data.tubesEl[ i ].setAttribute('path', this.data.tubesEl[ i ].getAttribute('path') + ',' + this.data.bird.position.x +' '+ this.data.bird.position.y + ' '+ this.data.bird.position.z);
+               this.data.tubesEl[ i ].setAttribute('material', 'color: red');
+               this.data.tubesEl[ i ].attributes['material'].value = 'color: red'
+               this.data.tubesEl[ i ].attributes['path'].value = this.data.tubesEl[ i ].getAttribute('path') + ',' + this.data.boidSubject.position.x +' '+ this.data.boidSubject.position.y + ' '+ this.data.boidSubject.position.z
+               //this.data.tubesEl[ i ].components.tube.mesh.geometry.vertices.push( new THREE.Vector3(this.data.boidSubject.position.x ,this.data.boidSubject.position.y , this.data.boidSubject.position.z ))
+               this.data.tubesEl[ i ].components.tube.mesh.geometry.verticesNeedUpdate = true
+               //this.data.tubesEl[ i ].setAttribute('path', this.data.tubesEl[ i ].getAttribute('path') + ',' + this.data.boidSubject.position.x +' '+ this.data.boidSubject.position.y + ' '+ this.data.boidSubject.position.z);
            }
 
-            this.data.bird.phase = ( this.data.bird.phase + ( Math.max( 0, this.data.bird.rotation.z ) + 0.1 )  ) % 62.83;
-            this.data.bird.geometry.vertices[ 5 ].y = this.data.bird.geometry.vertices[ 4 ].y = Math.sin( this.data.bird.phase ) * 5;
+            this.data.boidSubject.phase = ( this.data.boidSubject.phase + ( Math.max( 0, this.data.boidSubject.rotation.z ) + 0.1 )  ) % 62.83;
+            this.data.boidSubject.geometry.vertices[ 5 ].y = this.data.boidSubject.geometry.vertices[ 4 ].y = Math.sin( this.data.boidSubject.phase ) * 5;
 
         }
 

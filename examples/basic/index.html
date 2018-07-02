@@ -3,11 +3,18 @@
     <title>A-Frame boids Component - Basic</title>
     <meta name="description" content="Basic example for boids component."></meta>
     <script src="../build.js"></script>
+    <script src="../aframe-extras.js"></script>
   </head>
   <body>
     <a-scene>
       <a-assets></a-assets>
       <a-entity aframe-boids=""></a-entity>
+      <a-tube id="masterTube" path="5 0 5, 5 0 -5, -5 0 -5" radius="0.5" material="color: red"></a-tube>
+
+      <a-entity position="0 0 -10">
+        <a-camera></a-camera>
+      </a-entity>
+
     </a-scene>
 
     <!-- GitHub Corner. -->
