@@ -4,7 +4,12 @@
 [![License](http://img.shields.io/npm/l/aframe-aframe-boids-component.svg?style=flat-square)](https://npmjs.org/package/aframe-aframe-boids-component)
 
 Boids a component to manage flocking behavior in aframe
-
+<br />
+<br />
+<a href='http://seacloud9.github.io/aframe-boids/basic/' target='blank'>
+<img src='aframe-boids.gif' alt='aframe-boids' />
+</a>
+<br />
 For [A-Frame](https://aframe.io).
 
 ### API
